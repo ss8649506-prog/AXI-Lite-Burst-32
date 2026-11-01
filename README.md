@@ -8,7 +8,7 @@ The project focuses on designing and verifying a configurable AXI4-Lite Slave In
 
 ## Project Details
 
-- **Project Number:** P_190
+- **Project Number:** 20
 - **Domain:** VLSI
 - **Difficulty:** Intermediate
 - **Duration:** 4 Weeks
