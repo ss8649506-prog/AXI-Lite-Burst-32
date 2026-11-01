@@ -8,7 +8,7 @@ The project focuses on designing and verifying a configurable AXI4-Lite Slave In
 
 ## Project Details
 
-- **Project Number:** 20
+- **Project Number:** P_190
 - **Domain:** VLSI
 - **Difficulty:** Intermediate
 - **Duration:** 4 Weeks
@@ -70,7 +70,7 @@ The RTL modules are simulated using Verilog testbenches in Xilinx Vivado. Simula
 ## Tools and Resources
 
 - [Xilinx Vivado](https://www.amd.com/en/products/software/adaptive-socs-and-fpgas/vivado.html)
-- [GitHub Repository](
+- [GitHub Repository](https://github.com/ss8649506-prog/AXI-Lite-Burst-32)
 
 ## Author
 
