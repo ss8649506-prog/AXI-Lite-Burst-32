@@ -70,11 +70,11 @@ The RTL modules are simulated using Verilog testbenches in Xilinx Vivado. Simula
 ## Tools and Resources
 
 - [Xilinx Vivado](https://www.amd.com/en/products/software/adaptive-socs-and-fpgas/vivado.html)
-- [GitHub Repository](PASTE-YOUR-REPOSITORY-LINK-HERE)
+- [GitHub Repository](
 
 ## Author
 
-**Name:** Your Name  
+**Name:** SHUBHAM SINGH
 **College:** ABES Engineering College  
 **Programme:** HCLTech Career Shaper Programme 2025–26
 
