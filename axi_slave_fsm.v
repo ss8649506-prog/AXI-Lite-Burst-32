@@ -1,22 +1,24 @@
+`timescale 1ns/1ps
+
 module axi_slave_fsm (
-    input wire aclk,
-    input wire aresetn,
+    input  wire aclk,
+    input  wire aresetn,
 
-    input wire awvalid,
-    input wire awready,
-    input wire wvalid,
-    input wire wready,
-    input wire bvalid,
-    input wire bready,
+    input  wire awvalid,
+    input  wire awready,
+    input  wire wvalid,
+    input  wire wready,
+    input  wire bvalid,
+    input  wire bready,
 
-    input wire arvalid,
-    input wire arready,
-    input wire rvalid,
-    input wire rready,
+    input  wire arvalid,
+    input  wire arready,
+    input  wire rvalid,
+    input  wire rready,
 
-    output reg write_start,
-    output reg read_start,
-    output reg busy
+    output reg  write_start,
+    output reg  read_start,
+    output reg  busy
 );
 
     localparam IDLE       = 3'b000;

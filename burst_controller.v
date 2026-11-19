@@ -1,23 +1,25 @@
+`timescale 1ns/1ps
+
 module burst_controller #(
     parameter ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32,
     parameter LEN_WIDTH  = 8
 )(
-    input wire aclk,
-    input wire aresetn,
+    input  wire                  aclk,
+    input  wire                  aresetn,
 
-    input wire start,
-    input wire write_mode,
-    input wire [ADDR_WIDTH-1:0] start_addr,
-    input wire [LEN_WIDTH-1:0] burst_len,
+    input  wire                  start,
+    input  wire                  write_mode,
+    input  wire [ADDR_WIDTH-1:0] start_addr,
+    input  wire [LEN_WIDTH-1:0]  burst_len,
 
-    output reg [ADDR_WIDTH-1:0] current_addr,
-    output reg [LEN_WIDTH-1:0] beat_count,
-    output reg burst_active,
-    output reg burst_done,
+    output reg  [ADDR_WIDTH-1:0] current_addr,
+    output reg  [LEN_WIDTH-1:0]  beat_count,
+    output reg                   burst_active,
+    output reg                   burst_done,
 
-    output reg axi_valid,
-    input wire axi_ready
+    output reg                   axi_valid,
+    input  wire                  axi_ready
 );
 
     always @(posedge aclk or negedge aresetn) begin
@@ -39,7 +41,7 @@ module burst_controller #(
             end
             else if (burst_active && axi_valid && axi_ready) begin
                 if (beat_count <= 1) begin
-                    beat_count   <= 0;
+                    beat_count   <= {LEN_WIDTH{1'b0}};
                     burst_active <= 1'b0;
                     axi_valid    <= 1'b0;
                     burst_done   <= 1'b1;

@@ -1,67 +1,73 @@
+`timescale 1ns/1ps
+
 module axi_lite_burst32_top #(
-    parameter ADDR_WIDTH = 32,
-    parameter DATA_WIDTH = 32,
-    parameter STRB_WIDTH = DATA_WIDTH / 8,
+    parameter ADDR_WIDTH     = 32,
+    parameter DATA_WIDTH     = 32,
+    parameter STRB_WIDTH     = DATA_WIDTH / 8,
     parameter REG_ADDR_WIDTH = 4,
-    parameter REG_DEPTH = 16
+    parameter REG_DEPTH      = 16,
+    parameter BASE_ADDR      = 32'h40000000
 )(
-    input wire aclk,
-    input wire aresetn,
+    input  wire                  aclk,
+    input  wire                  aresetn,
 
-    // AXI Write Address
-    input wire [ADDR_WIDTH-1:0] s_axi_awaddr,
-    input wire s_axi_awvalid,
-    output wire s_axi_awready,
+    // AXI Write Address Channel
+    input  wire [ADDR_WIDTH-1:0] s_axi_awaddr,
+    input  wire                  s_axi_awvalid,
+    output wire                  s_axi_awready,
 
-    // AXI Write Data
-    input wire [DATA_WIDTH-1:0] s_axi_wdata,
-    input wire [STRB_WIDTH-1:0] s_axi_wstrb,
-    input wire s_axi_wvalid,
-    output wire s_axi_wready,
+    // AXI Write Data Channel
+    input  wire [DATA_WIDTH-1:0] s_axi_wdata,
+    input  wire [STRB_WIDTH-1:0] s_axi_wstrb,
+    input  wire                  s_axi_wvalid,
+    output wire                  s_axi_wready,
 
-    // AXI Write Response
-    output wire [1:0] s_axi_bresp,
-    output wire s_axi_bvalid,
-    input wire s_axi_bready,
+    // AXI Write Response Channel
+    output wire [1:0]            s_axi_bresp,
+    output wire                  s_axi_bvalid,
+    input  wire                  s_axi_bready,
 
-    // AXI Read Address
-    input wire [ADDR_WIDTH-1:0] s_axi_araddr,
-    input wire s_axi_arvalid,
-    output wire s_axi_arready,
+    // AXI Read Address Channel
+    input  wire [ADDR_WIDTH-1:0] s_axi_araddr,
+    input  wire                  s_axi_arvalid,
+    output wire                  s_axi_arready,
 
-    // AXI Read Data
+    // AXI Read Data Channel
     output wire [DATA_WIDTH-1:0] s_axi_rdata,
-    output wire [1:0] s_axi_rresp,
-    output wire s_axi_rvalid,
-    input wire s_axi_rready,
+    output wire [1:0]            s_axi_rresp,
+    output wire                  s_axi_rvalid,
+    input  wire                  s_axi_rready,
 
-    // Burst control
-    input wire burst_start,
-    input wire [ADDR_WIDTH-1:0] burst_start_addr,
-    input wire [7:0] burst_length,
-    output wire burst_active,
-    output wire burst_done,
+    // Burst Control Interface
+    input  wire                  burst_start,
+    input  wire [ADDR_WIDTH-1:0] burst_start_addr,
+    input  wire [7:0]            burst_length,
+    output wire                  burst_active,
+    output wire                  burst_done,
 
-    // Low power
-    output wire low_power_enable
+    // Low-Power Management
+    output wire                  low_power_enable
 );
 
-    wire reg_wr_en;
-    wire [ADDR_WIDTH-1:0] reg_wr_addr;
-    wire [DATA_WIDTH-1:0] reg_wr_data;
-    wire [STRB_WIDTH-1:0] reg_wr_strb;
+    // Internal interconnect between slave interface and register bank
+    wire                      reg_wr_en;
+    wire [REG_ADDR_WIDTH-1:0] reg_wr_addr;
+    wire [DATA_WIDTH-1:0]     reg_wr_data;
+    wire [STRB_WIDTH-1:0]     reg_wr_strb;
 
-    wire reg_rd_en;
-    wire [ADDR_WIDTH-1:0] reg_rd_addr;
-    wire [DATA_WIDTH-1:0] reg_rd_data;
+    wire                      reg_rd_en;
+    wire [REG_ADDR_WIDTH-1:0] reg_rd_addr;
+    wire [DATA_WIDTH-1:0]     reg_rd_data;
 
-    wire [ADDR_WIDTH-1:0] burst_current_addr;
-    wire [7:0] burst_beat_count;
-    wire burst_axi_valid;
+    wire [ADDR_WIDTH-1:0]     burst_current_addr;
+    wire [7:0]                burst_beat_count;
+    wire                      burst_axi_valid;
 
-    wire busy;
+    wire                      busy;
 
-    // Register memory bank
+    // -------------------------------------------------------------
+    // 16 x 32-bit Register Memory Bank
+    // -------------------------------------------------------------
     reg_mem_bank #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(REG_ADDR_WIDTH),
@@ -71,18 +77,22 @@ module axi_lite_burst32_top #(
         .aclk(aclk),
         .aresetn(aresetn),
         .wr_en(reg_wr_en),
-        .wr_addr(reg_wr_addr[REG_ADDR_WIDTH-1:0]),
+        .wr_addr(reg_wr_addr),
         .wr_data(reg_wr_data),
         .wr_strb(reg_wr_strb),
-        .rd_addr(reg_rd_addr[REG_ADDR_WIDTH-1:0]),
+        .rd_addr(reg_rd_addr),
         .rd_data(reg_rd_data)
     );
 
-    // AXI-Lite slave interface
+    // -------------------------------------------------------------
+    // AXI4-Lite Slave Interface
+    // -------------------------------------------------------------
     axi_lite_slave_interface #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
-        .STRB_WIDTH(STRB_WIDTH)
+        .STRB_WIDTH(STRB_WIDTH),
+        .REG_ADDR_WIDTH(REG_ADDR_WIDTH),
+        .BASE_ADDR(BASE_ADDR)
     ) slave_interface (
         .aclk(aclk),
         .aresetn(aresetn),
@@ -119,7 +129,9 @@ module axi_lite_burst32_top #(
         .reg_rd_data(reg_rd_data)
     );
 
-    // Burst controller
+    // -------------------------------------------------------------
+    // Burst Controller Subsystem
+    // -------------------------------------------------------------
     burst_controller #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
@@ -139,14 +151,20 @@ module axi_lite_burst32_top #(
         .axi_ready(s_axi_awready)
     );
 
-    // Low-power controller
-    low_power_controller low_power_unit (
+    // -------------------------------------------------------------
+    // Low-Power Management Unit
+    // -------------------------------------------------------------
+    low_power_controller #(
+        .IDLE_COUNT_WIDTH(8),
+        .IDLE_THRESHOLD(8'd10)
+    ) low_power_unit (
         .aclk(aclk),
         .aresetn(aresetn),
         .busy(busy),
         .low_power_enable(low_power_enable)
     );
 
+    // Activity detector
     assign busy = s_axi_awvalid |
                   s_axi_wvalid  |
                   s_axi_bvalid  |

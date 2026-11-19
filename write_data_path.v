@@ -1,35 +1,36 @@
+`timescale 1ns/1ps
 
 module write_data_path #(
     parameter ADDR_WIDTH = 4,
     parameter DATA_WIDTH = 32,
     parameter STRB_WIDTH = DATA_WIDTH / 8
 )(
-    input wire aclk,
-    input wire aresetn,
+    input  wire                  aclk,
+    input  wire                  aresetn,
 
     // Address decoder outputs
-    input wire [ADDR_WIDTH-1:0] aw_reg_addr,
-    input wire aw_addr_valid,
+    input  wire [ADDR_WIDTH-1:0] aw_reg_addr,
+    input  wire                  aw_addr_valid,
 
     // AXI write address channel
-    input wire awvalid,
-    output wire awready,
+    input  wire                  awvalid,
+    output wire                  awready,
 
     // AXI write data channel
-    input wire [DATA_WIDTH-1:0] wdata,
-    input wire [STRB_WIDTH-1:0] wstrb,
-    input wire wvalid,
-    output wire wready,
+    input  wire [DATA_WIDTH-1:0] wdata,
+    input  wire [STRB_WIDTH-1:0] wstrb,
+    input  wire                  wvalid,
+    output wire                  wready,
 
     // Register bank write interface
-    output wire wr_en,
+    output wire                  wr_en,
     output wire [ADDR_WIDTH-1:0] wr_addr,
     output wire [DATA_WIDTH-1:0] wr_data,
     output wire [STRB_WIDTH-1:0] wr_strb,
 
     // Transaction status
-    output wire wr_done,
-    output wire wr_error
+    output wire                  wr_done,
+    output wire                  wr_error
 );
 
     reg aw_pending;
@@ -45,13 +46,13 @@ module write_data_path #(
     assign awready = !aw_pending;
     assign wready  = !w_pending;
 
-    // Both write channels accepted
+    // Both channels accepted - transaction complete
     assign wr_done = aw_pending && w_pending;
 
-    // Register bank write enable
+    // Register bank write enable (only if address was valid)
     assign wr_en = wr_done && address_valid_reg;
 
-    // Invalid address indication
+    // Invalid address indication for error response (SLVERR)
     assign wr_error = wr_done && !address_valid_reg;
 
     // Register bank outputs
@@ -70,13 +71,11 @@ module write_data_path #(
             strobe_reg        <= {STRB_WIDTH{1'b0}};
         end
         else begin
-
             if (wr_done) begin
                 aw_pending <= 1'b0;
                 w_pending  <= 1'b0;
             end
             else begin
-
                 if (awvalid && awready) begin
                     aw_pending        <= 1'b1;
                     address_reg       <= aw_reg_addr;
@@ -85,10 +84,9 @@ module write_data_path #(
 
                 if (wvalid && wready) begin
                     w_pending  <= 1'b1;
-                    data_reg  <= wdata;
+                    data_reg   <= wdata;
                     strobe_reg <= wstrb;
                 end
-
             end
         end
     end
